@@ -17,7 +17,7 @@ class Lox {
 
     private runFile = (path: string): void => {
         const file = fs.readFileSync(path, { encoding: "utf8" })
-        this.run(file, path)
+        this.run(file)
 
         if (this.hadError)
             process.exit(65)

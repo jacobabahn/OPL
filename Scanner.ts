@@ -45,17 +45,17 @@ class Scanner {
                 break
             case '*': this.addToken(TokenType.STAR)
                 break
-            case '!': this.addToken(match('=') ? TokenType.BANG_EQUAL : TokenType.BANG)
+            case '!': this.addToken(this.match('=') ? TokenType.BANG_EQUAL : TokenType.BANG)
                 break
-            case '=': this.addToken(match('=') ? TokenType.EQUAL_EQUAL : TokenType.EQUAL)
+            case '=': this.addToken(this.match('=') ? TokenType.EQUAL_EQUAL : TokenType.EQUAL)
                 break
-            case '<': this.addToken(match('=') ? TokenType.LESS_EQUAL : TokenType.LESS)
+            case '<': this.addToken(this.match('=') ? TokenType.LESS_EQUAL : TokenType.LESS)
                 break
-            case '>': this.addToken(match('=') ? TokenType.GREATER_EQUAL : TokenType.GREATER)
+            case '>': this.addToken(this.match('=') ? TokenType.GREATER_EQUAL : TokenType.GREATER)
                 break
             case '/':
-                if (match('/')) {
-                    while (peek() !== '\n' && !this.isAtEnd()) {
+                if (this.match('/')) {
+                    while (this.peek() !== '\n' && !this.isAtEnd()) {
                         this.advance()
                     }} else {
                         this.addToken(TokenType.SLASH)
@@ -70,11 +70,17 @@ class Scanner {
                 break
             case '"':
                 this.string()
-                breakS
-            
+                break
+            case 'o':
+                if (this.match('r')) {
+                    this.addToken(TokenType.OR)
+                }
+                break
             default:
-                if (parseInt(c)) {
+                if (this.isDigit(c)) {
                     this.number()
+                } else if (this.isAlpha(c)){
+                    this.identifier()
                 } else {
                     new Lox().error(this.line, "Unexpected character.") 
                 }
@@ -82,9 +88,50 @@ class Scanner {
         }
     }
 
+    private identifier = (): void => {
+        while (this.isAlphaNumeric(this.peek())) {
+            this.advance()
+        }
+        const text = this.source.substring(this.start, this.current)
+        const type = this.keywords[text]
+        if (type) {
+            this.addToken(type)
+        } else {
+            this.addToken(TokenType.IDENTIFIER)
+        }
+    }
+
+    private isAlpha = (c: String): boolean => {
+        return (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') || c === '_'
+    }
+
+    private isAlphaNumeric = (c: String): boolean => {
+        return this.isAlpha(c) || this.isDigit(c)
+    }
+
+    private number = (): void => {
+        while (this.isDigit(this.peek())) {
+            this.advance()
+        }
+
+        if (this.peek() === '.' && this.isDigit(this.peekNext())) {
+            this.advance()
+
+            while (this.isDigit(this.peek())) {
+                this.advance()
+            }
+        }
+
+        this.addToken(TokenType.NUMBER, parseFloat(this.source.substring(this.start, this.current)))
+    }
+
+    private isDigit = (c: String): boolean => {
+        return c >= '0' && c <= '9'
+    }
+
     private string = (): void => {
-        while (peek() !== '"' && !this.isAtEnd()) {
-            if (peek() === '\n') {
+        while (this.peek() !== '"' && !this.isAtEnd()) {
+            if (this.peek() === '\n') {
                 this.line++
             }
             this.advance()
@@ -113,6 +160,11 @@ class Scanner {
         return this.source[this.current]
     }
 
+    private peekNext = (): string => {
+        if (this.current + 1 >= this.source.length) return "\0"
+        return this.source[this.current + 1]
+    }
+
     private isAtEnd = (): boolean => {
         return this.current >= this.source.length
     }
@@ -126,6 +178,27 @@ class Scanner {
         this.tokens.push(new Token(type, text, literal, this.line))
     }
 
+    keywords = {
+        "and": TokenType.AND,
+        "class": TokenType.CLASS,
+        "else": TokenType.ELSE,
+        "false": TokenType.FALSE,
+        "for": TokenType.FOR,
+        "fun": TokenType.FUN,
+        "if": TokenType.IF,
+        "nil": TokenType.NIL,
+        "or": TokenType.OR,
+        "print": TokenType.PRINT,
+        "return": TokenType.RETURN,
+        "super": TokenType.SUPER,
+        "this": TokenType.THIS,
+        "true": TokenType.TRUE,
+        "var": TokenType.VAR,
+        "while": TokenType.WHILE
+    }
+    
+
 }
+
 
 export default Scanner
