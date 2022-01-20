@@ -1,3 +1,5 @@
+import { readFileSync } from 'fs';
+import { relative } from 'path/win32';
 import Scanner from "./Scanner";
 
 class Lox {
@@ -16,7 +18,7 @@ class Lox {
     }
 
     private runFile = (path: string): void => {
-        const file = fs.readFileSync(path, { encoding: "utf8" })
+        const file = readFileSync(path, { encoding: "utf8" })
         this.run(file)
 
         if (this.hadError)
@@ -26,17 +28,27 @@ class Lox {
     private runPrompt = (): void => {
         const readline = require("readline")
 
-        let line: string
-        while (true) {
-            line = readline.question("> ")
-            if (line !== null) {
-                this.run(line)
-                this.hadError = false
-            }   
-            else {
-                break
-            }
+        const line = readline.createInterface({
+            input: process.stdin,
+            output: process.stdout
+        })
+
+        const promptLoop = () => {
+            line.question("> ", (response: string) => {
+                if (response === null) {
+                    process.exit(1)
+                }
+
+                this.run(response)
+
+                if (this.hadError)
+                    process.exit(65)
+                
+                promptLoop()
+            })
         }
+
+        promptLoop()
     }
 
     private run = (source: string) => {
@@ -54,7 +66,11 @@ class Lox {
 
     report = (line: number, where: string, message: string): void => {
         console.error(`[line ${line}] Error${where}: ${message}`)
+        this.hadError = true
     }
 }
 
-export default Lox
+let instance: Lox = new Lox()
+instance.main(process.argv.slice(2))
+
+export { Lox, instance }

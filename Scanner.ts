@@ -1,4 +1,6 @@
-import Lox from "./Lox"
+import { instance } from "./Lox"
+import { TokenType } from "./TokenType"
+import Token from "./Token"
 
 class Scanner {
     private source: string
@@ -22,8 +24,7 @@ class Scanner {
     }
 
     private scanToken = (): void => {
-        // let lox = new Lox()
-        const c: String = this.advance()
+        const c: string = this.advance()
         switch (c) {
             case '(': this.addToken(TokenType.LEFT_PAREN)
                 break
@@ -61,10 +62,9 @@ class Scanner {
                         this.addToken(TokenType.SLASH)
                     }
                     break
-            case ' ':
-            case '\r':
-            case '\t':
-                break
+            case ' ': break;
+            case '\r': break;
+            case '\t': break;
             case '\n':
                 this.line++
                 break
@@ -82,7 +82,7 @@ class Scanner {
                 } else if (this.isAlpha(c)){
                     this.identifier()
                 } else {
-                    new Lox().error(this.line, "Unexpected character.") 
+                    instance.error(this.line, "Unexpected character.")
                 }
                 break
         }
@@ -93,8 +93,8 @@ class Scanner {
             this.advance()
         }
         const text = this.source.substring(this.start, this.current)
-        const type = this.keywords[text]
-        if (type) {
+        const type: any = this.keywords.get(text)
+        if (this.keywords.has(text)) {
             this.addToken(type)
         } else {
             this.addToken(TokenType.IDENTIFIER)
@@ -138,7 +138,7 @@ class Scanner {
         }
 
         if (this.isAtEnd()) {
-            new Lox().error(this.line, "Unterminated string.")
+            instance.error(this.line, "Unterminated string.")
             return
         }
 
@@ -173,30 +173,29 @@ class Scanner {
         return this.source[this.current++]
     }
 
-    private addToken = (type: TokenType, literal: Object = null): void => {
+    private addToken = (type: TokenType, literal: unknown = null): void => {
         const text: string = this.source.slice(this.start, this.current)
         this.tokens.push(new Token(type, text, literal, this.line))
     }
 
-    keywords = {
-        "and": TokenType.AND,
-        "class": TokenType.CLASS,
-        "else": TokenType.ELSE,
-        "false": TokenType.FALSE,
-        "for": TokenType.FOR,
-        "fun": TokenType.FUN,
-        "if": TokenType.IF,
-        "nil": TokenType.NIL,
-        "or": TokenType.OR,
-        "print": TokenType.PRINT,
-        "return": TokenType.RETURN,
-        "super": TokenType.SUPER,
-        "this": TokenType.THIS,
-        "true": TokenType.TRUE,
-        "var": TokenType.VAR,
-        "while": TokenType.WHILE
-    }
-    
+    keywords = new Map([
+        ["and", TokenType.AND],
+        ["class", TokenType.CLASS],
+        ["else", TokenType.ELSE],
+        ["false", TokenType.FALSE],
+        ["for", TokenType.FOR],
+        ["fun", TokenType.FUN],
+        ["if", TokenType.IF],
+        ["nil", TokenType.NIL],
+        ["or", TokenType.OR],
+        ["print", TokenType.PRINT],
+        ["return", TokenType.RETURN],
+        ["super", TokenType.SUPER],
+        ["this", TokenType.THIS],
+        ["true", TokenType.TRUE],
+        ["var", TokenType.VAR],
+        ["while", TokenType.WHILE]
+    ])
 
 }
 
