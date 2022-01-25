@@ -1,6 +1,6 @@
 import { readFileSync } from 'fs';
 import { relative } from 'path/win32';
-import Scanner from "./Scanner";
+import Scanner from "./scanner";
 
 class Lox {
     hadError: boolean = false;

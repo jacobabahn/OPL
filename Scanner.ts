@@ -1,6 +1,6 @@
-import { instance } from "./Lox"
+import { instance } from "./tsLox"
 import { TokenType } from "./TokenType"
-import Token from "./Token"
+import Token from "./token"
 
 class Scanner {
     private source: string
