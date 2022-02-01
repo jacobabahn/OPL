@@ -1,6 +1,8 @@
 import { readFileSync } from 'fs';
 import { relative } from 'path/win32';
 import Scanner from "./scanner";
+import Token from './token';
+import { TokenType } from "./TokenType";
 
 class Lox {
     hadError: boolean = false;
@@ -62,6 +64,14 @@ class Lox {
 
     error = (line: number, message: string): void => {
         this.report(line, "", message)
+    }
+
+    errorToken = (token: Token, message: string): any => {
+        if (token.type === TokenType.EOF) {
+            this.report(token.line, " at end", message)
+        } else {
+            this.report(token.line, ` at '${token.lexeme}'`, message)
+        }
     }
 
     report = (line: number, where: string, message: string): void => {
