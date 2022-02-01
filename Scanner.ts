@@ -1,4 +1,4 @@
-import { instance } from "./tsLox"
+import { error } from "./TSLox"
 import { TokenType } from "./TokenType"
 import Token from "./token"
 
@@ -82,7 +82,7 @@ class Scanner {
                 } else if (this.isAlpha(c)){
                     this.identifier()
                 } else {
-                    instance.error(this.line, "Unexpected character.")
+                    error(this.line, "Unexpected character.")
                 }
                 break
         }
@@ -138,7 +138,7 @@ class Scanner {
         }
 
         if (this.isAtEnd()) {
-            instance.error(this.line, "Unterminated string.")
+            error(this.line, "Unterminated string.")
             return
         }
 
