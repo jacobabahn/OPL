@@ -4,6 +4,7 @@ import Token from './Token';
 import { TokenType } from "./TokenType";
 import Parser from './parser';
 import AstPrinter from './AstPrinter';
+import RpnPrinter from './RpnPrinter';
 import Interpreter from './Interpreter';
 import { argv } from 'process';
 
@@ -71,7 +72,7 @@ const run = (source: string) => {
         return
     
     interpreter.interpret(expression)
-    console.log(new AstPrinter().printExpr(expression))
+    console.log(new RpnPrinter().printExpr(expression))
 }
 
 const error = (line: number, message: string): void => {
