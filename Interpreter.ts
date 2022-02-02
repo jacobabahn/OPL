@@ -1,4 +1,4 @@
-import { Visitor, Literal, Binary, Unary, Grouping, Expr } from "./Expr";
+import { Visitor, Literal, Binary, Unary, Grouping, Ternary, Expr } from "./Expr";
 import { TokenType } from "./TokenType";
 import Token from "./Token";
 
@@ -30,6 +30,17 @@ class Interpreter implements Visitor<any> {
         return null
     }
 
+    public visitTernaryExpr(expr: Ternary): any {
+        const operator = this.evaluate(expr.operator)
+
+        if (this.isTruthy(operator)) {
+            return this.evaluate(expr.ifTrue)
+        } else {
+            return this.evaluate(expr.ifFalse)
+        }
+
+    }
+
     private checkNumberOperand = (operator: Token, operand: any): void => {
         if (typeof operand === 'number') return
 
@@ -56,7 +67,7 @@ class Interpreter implements Visitor<any> {
         if (a === null && b === null) return true
         if (a === null) return false
 
-        return a.equals(b)
+        return a === (b)
     }
 
     public visitBinaryExpr(expr: Binary): any {

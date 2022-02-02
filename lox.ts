@@ -11,8 +11,13 @@ import { argv } from 'process';
 const interpreter = new Interpreter()
 let hadError: boolean = false
 let hadRuntimeError = false
+let rpn = false
 
 const main = (args: string[]): void => {
+    if (args[0] === "--rpn") {
+        rpn = true
+    }
+
     if (args.length > 1) {
         console.log("Usage: jlox [script]")
         process.exit(64)
@@ -70,9 +75,11 @@ const run = (source: string) => {
 
     if (hadError) 
         return
-    
-    interpreter.interpret(expression)
-    console.log(new RpnPrinter().printExpr(expression))
+    if (rpn) {
+        console.log(new RpnPrinter().printExpr(expression))
+    } else {
+        interpreter.interpret(expression)
+    }
 }
 
 const error = (line: number, message: string): void => {

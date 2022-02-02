@@ -91,6 +91,10 @@ class AstPrinter implements Expr.Visitor<string> {
     //     throw new Error("Method not implemented.");
     // }
 
+    visitTernaryExpr(expr: Expr.Ternary): string {
+        return ""
+    }
+
     private parenthesize(name: string, ...exprs: Expr.Expr[]) {
         let output = `(${name}`
         for (const expr of exprs) {

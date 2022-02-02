@@ -5,6 +5,7 @@ export interface Visitor<R> {
     visitGroupingExpr(expr: Grouping): R
     visitLiteralExpr(expr: Literal): R
     visitUnaryExpr(expr: Unary): R
+    visitTernaryExpr(expr: Ternary): R
 }
 
 export abstract class Expr {
@@ -66,5 +67,22 @@ export class Unary extends Expr {
 
     accept = <R>(visitor: Visitor<R>): R => {
         return visitor.visitUnaryExpr(this)
+    }
+}
+
+export class Ternary extends Expr {
+    readonly operator: Expr
+    readonly ifTrue: Expr
+    readonly ifFalse: Expr
+
+    constructor(operator: Expr, ifTrue: Expr, ifFalse: Expr) {
+        super()
+        this.operator = operator
+        this.ifTrue = ifTrue
+        this.ifFalse = ifFalse
+    }
+
+    accept = <R>(visitor: Visitor<R>): R => {
+        return visitor.visitTernaryExpr(this)
     }
 }

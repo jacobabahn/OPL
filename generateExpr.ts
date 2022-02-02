@@ -10,7 +10,8 @@ const expTypes = [
     "Binary   : left: Expr, operator: Token, right: Expr",
     "Grouping : expression: Expr",
     "Literal  : value: unknown",
-    "Unary    : operator: Token, right: Expr"
+    "Unary    : operator: Token, right: Expr",
+    "Ternary  : operator: Expr, ifTrue: Expr, ifFalse: Expr"
 ]
 
 const defineType = (baseName: string, className: string, fields: string): string => {

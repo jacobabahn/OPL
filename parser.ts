@@ -1,6 +1,6 @@
 import Token from "./Token"
 import { TokenType } from "./TokenType"
-import { Binary, Unary, Literal, Grouping, Expr } from "./Expr"
+import { Binary, Unary, Literal, Grouping, Ternary, Expr } from "./Expr"
 import { errorToken } from "./lox"
 
 class Parser {
@@ -20,7 +20,23 @@ class Parser {
     }
 
     private expression = (): Expr => {
-        return this.equality()
+        return this.ternary()
+    }
+
+    private ternary = (): Expr => {
+        let value = this.equality()
+
+        if (this.match([TokenType.QUESTION])) {
+            let left = this.ternary()
+            if (this.match([TokenType.COLON])) {
+                let right = this.ternary()
+                return new Ternary(value, left, right)
+            } else {
+                throw this.error(this.peek(), "Expect '?' to have matching ':'.")
+            }
+        }
+
+        return value
     }
 
     private equality = (): Expr => {
