@@ -1,4 +1,4 @@
-import { error } from "./TSLox"
+import { error } from "./lox"
 import { TokenType } from "./TokenType"
 import Token from "./Token"
 

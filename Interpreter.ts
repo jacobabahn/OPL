@@ -31,7 +31,7 @@ class Interpreter implements Visitor<any> {
     }
 
     private checkNumberOperand = (operator: Token, operand: any): void => {
-        if (operand instanceof Number) return
+        if (typeof operand === 'number') return
 
         throw new RuntimeError(operator, "Operand must be a number.")
     }
@@ -40,14 +40,14 @@ class Interpreter implements Visitor<any> {
         if (object === null || object === undefined) {
             return false
         } 
-        if (object instanceof Boolean) {
+        if (typeof object === 'boolean') {
             return Boolean(object)
         } 
         return true
     }
 
     private checkNumberOperands = (operator: Token, left: any, right: any): void => {
-        if (left instanceof Number && right instanceof Number) return
+        if (typeof left === 'number' && typeof right === 'number') return
 
         throw new RuntimeError(operator, "Operands must be numbers.")
     }

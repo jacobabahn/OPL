@@ -1,7 +1,7 @@
 import Token from "./Token"
 import { TokenType } from "./TokenType"
 import { Binary, Unary, Literal, Grouping, Expr } from "./Expr"
-import { errorToken } from "./TSLox"
+import { errorToken } from "./lox"
 
 class Parser {
     private tokens: Token[]
@@ -15,7 +15,7 @@ class Parser {
         try {
             return this.expression()
         } catch (error) {
-            return null
+            return new Literal(null)
         }
     }
 
@@ -26,7 +26,7 @@ class Parser {
     private equality = (): Expr => {
         let expr = this.comparison()
 
-        while (this.match('==') || this.match('!=')) {
+        while (this.match([TokenType.BANG_EQUAL, TokenType.EQUAL_EQUAL])) {
             const operator = this.previous()
             expr = new Binary(expr, operator, this.comparison())
         }
@@ -37,7 +37,7 @@ class Parser {
     private comparison = (): Expr => {
         let expr = this.term()
 
-        while (this.match('<') || this.match('>') || this.match('<=') || this.match('>=')) {
+        while (this.match([TokenType.GREATER, TokenType.GREATER_EQUAL, TokenType.LESS, TokenType.LESS_EQUAL])) {
             const operator = this.previous()
             let right = this.term()
             expr = new Binary(expr, operator, right)
@@ -49,7 +49,7 @@ class Parser {
     private term = (): Expr => {
         let expr = this.factor()
 
-        while (this.match('-') || this.match('+')) {
+        while (this.match([TokenType.PLUS, TokenType.MINUS])) {
             let operator = this.previous()
             let right = this.factor()
             expr = new Binary(expr, operator, right)
@@ -61,7 +61,7 @@ class Parser {
     private factor = (): Expr => {
         let expr = this.unary()
 
-        if (this.match('*') || this.match('/')) {
+        if (this.match([TokenType.SLASH, TokenType.STAR])) {
             let operator = this.previous()
             let right = this.unary()
             expr = new Binary(expr, operator, right)
@@ -71,7 +71,7 @@ class Parser {
     }
 
     private unary = (): Expr => {
-        if (this.match('!') || this.match('-')) {
+        if (this.match([TokenType.BANG, TokenType.MINUS])) {
             let operator = this.previous()
             let right = this.unary()
             return new Unary(operator, right)
@@ -81,15 +81,15 @@ class Parser {
     }
 
     private primary = () => {
-        if (this.match(TokenType.FALSE)) return new Literal(false)
-        if (this.match(TokenType.TRUE)) return new Literal(true)
-        if (this.match(TokenType.NIL)) return new Literal(null)
+        if (this.match([TokenType.FALSE])) return new Literal(false)
+        if (this.match([TokenType.TRUE])) return new Literal(true)
+        if (this.match([TokenType.NIL])) return new Literal(null)
 
-        if (this.match(TokenType.NUMBER) || this.match(TokenType.STRING)) {
+        if (this.match([TokenType.NUMBER, TokenType.STRING])) {
             return new Literal(this.previous().literal)
         }
 
-        if (this.match(TokenType.LEFT_PAREN)) {
+        if (this.match([TokenType.LEFT_PAREN])) {
             let expr = this.expression()
             this.consume(TokenType.RIGHT_PAREN, "Expect ')' after expression.")
             return new Grouping(expr)
@@ -98,7 +98,7 @@ class Parser {
         throw this.error(this.peek(), "Expect expression.")
     }
 
-    private match = (types: any): boolean => {
+    private match = (types: TokenType[]): boolean => {
         for (const type of types) {
             if (this.check(type)) {
                 this.advance()

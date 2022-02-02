@@ -1,11 +1,11 @@
 import { readFileSync } from 'fs';
-import { relative } from 'path/win32';
 import Scanner from "./Scanner";
 import Token from './Token';
 import { TokenType } from "./TokenType";
 import Parser from './parser';
 import AstPrinter from './AstPrinter';
 import Interpreter from './Interpreter';
+import { argv } from 'process';
 
 const interpreter = new Interpreter()
 let hadError: boolean = false
@@ -67,9 +67,9 @@ const run = (source: string) => {
     const parser = new Parser(tokens)
     const expression = parser.parse()
 
-    if (hadError) return
-
-    console.log("\n===== AST =====")
+    if (hadError) 
+        return
+    
     interpreter.interpret(expression)
     console.log(new AstPrinter().printExpr(expression))
 }
@@ -95,5 +95,7 @@ const report = (line: number, where: string, message: string): void => {
     console.log(`[line ${line}] Error${where}: ${message}`)
     hadError = true
 }
+
+main(argv.slice(2))
 
 export { errorToken, error }
