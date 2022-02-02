@@ -1,9 +1,9 @@
 import { readFileSync } from 'fs';
 import { relative } from 'path/win32';
-import Scanner from "./scanner";
-import Token from './token';
+import Scanner from "./Scanner";
+import Token from './Token';
 import { TokenType } from "./TokenType";
-import Parser from './Parser';
+import Parser from './parser';
 import AstPrinter from './AstPrinter';
 import Interpreter from './Interpreter';
 
@@ -69,6 +69,7 @@ const run = (source: string) => {
 
     if (hadError) return
 
+    console.log("\n===== AST =====")
     interpreter.interpret(expression)
     console.log(new AstPrinter().printExpr(expression))
 }

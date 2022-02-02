@@ -1,6 +1,6 @@
 import { error } from "./TSLox"
 import { TokenType } from "./TokenType"
-import Token from "./token"
+import Token from "./Token"
 
 class Scanner {
     private source: string

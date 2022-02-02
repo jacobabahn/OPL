@@ -1,4 +1,4 @@
-import Token from "./token"
+import Token from "./Token"
 import { TokenType } from "./TokenType"
 import { Binary, Unary, Literal, Grouping, Expr } from "./Expr"
 import { errorToken } from "./TSLox"
@@ -11,7 +11,7 @@ class Parser {
         this.tokens = tokens
     }
 
-    parse = (): Expr => {
+    parse = (): any => {
         try {
             return this.expression()
         } catch (error) {
@@ -98,7 +98,7 @@ class Parser {
         throw this.error(this.peek(), "Expect expression.")
     }
 
-    private match = (types): boolean => {
+    private match = (types: any): boolean => {
         for (const type of types) {
             if (this.check(type)) {
                 this.advance()
@@ -114,7 +114,7 @@ class Parser {
         throw this.error(this.peek(), message)
     }
 
-    private check = (type): boolean => {
+    private check = (type: any): boolean => {
         if (this.isAtEnd()) {
             return false
         }
