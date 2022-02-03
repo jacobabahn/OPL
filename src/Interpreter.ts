@@ -63,6 +63,13 @@ class Interpreter implements Visitor<any> {
         throw new RuntimeError(operator, "Operands must be numbers.")
     }
 
+    private checkType = (operator: Token, left: any, right: any): void => {
+        if (typeof left === 'number' && typeof right === 'number') return
+        if (typeof left === 'string' && typeof right === 'string') return
+
+        throw new RuntimeError(operator, "Operands must be both numbers or strings.")
+    }
+
     private isEqual = (a: any, b: any): boolean => {
         if (a === null && b === null) return true
         if (a === null) return false
@@ -76,19 +83,19 @@ class Interpreter implements Visitor<any> {
 
         switch (expr.operator.type) {
             case TokenType.GREATER:
-                this.checkNumberOperands(expr.operator, left, right)
+                this.checkType(expr.operator, left, right)
                 return left > right
             case TokenType.GREATER_EQUAL:
-                this.checkNumberOperands(expr.operator, left, right)
+                this.checkType(expr.operator, left, right)
                 return left >= right
             case TokenType.LESS:
-                this.checkNumberOperands(expr.operator, left, right)
+                this.checkType(expr.operator, left, right)
                 return left < right
             case TokenType.LESS_EQUAL:
-                this.checkNumberOperands(expr.operator, left, right)
+                this.checkType(expr.operator, left, right)
                 return left <= right
             case TokenType.MINUS:
-                this.checkNumberOperands(expr.operator, left, right)
+                this.checkType(expr.operator, left, right)
                 return left - right
             case TokenType.PLUS:
                 if (typeof left === 'number' && typeof right === 'number'){
