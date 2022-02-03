@@ -11,6 +11,7 @@ const interpreter = new Interpreter()
 let hadError: boolean = false
 let hadRuntimeError = false
 let rpn = false
+let print = true
 
 const main = (): void => {
     let args = argv.slice(2)
@@ -18,7 +19,10 @@ const main = (): void => {
         rpn = true
         args.splice(args.indexOf("rpn"), 1)
     }
-    console.log(args)
+    if (args.includes("no-output")) {
+        args.splice(args.indexOf("no-output"), 1)
+        print = false
+    }
 
     if (args.length > 1) {
         console.log("Usage: jlox [script]")
@@ -36,10 +40,12 @@ const runFile = (path: string): void => {
     run(file)
 
     if (hadError)
-        process.exit(65)
+        // process.exit(65)
+        return
 
     if (hadRuntimeError)
-        process.exit(70)
+        // process.exit(70)
+        return
 }
 
 const runPrompt = (): void => {
@@ -51,16 +57,15 @@ const runPrompt = (): void => {
     })
 
     const promptLoop = () => {
-        line.question("> ", (response: string) => {
+        line.question(">", (response: string) => {
             if (response === null) {
-                process.exit(1)
+                // process.exit(1)
+                // return
             }
 
             run(response)
 
-            if (hadError)
-                process.exit(65)
-            
+            hadError = false
             promptLoop()
         })
     }

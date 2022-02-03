@@ -11,7 +11,7 @@ class Parser {
         this.tokens = tokens
     }
 
-    parse = (): any => {
+    parse = (): Expr => {
         try {
             return this.expression()
         } catch (error) {
@@ -77,7 +77,7 @@ class Parser {
     private factor = (): Expr => {
         let expr = this.unary()
 
-        if (this.match([TokenType.SLASH, TokenType.STAR])) {
+        while (this.match([TokenType.SLASH, TokenType.STAR])) {
             let operator = this.previous()
             let right = this.unary()
             expr = new Binary(expr, operator, right)
@@ -87,7 +87,7 @@ class Parser {
     }
 
     private unary = (): Expr => {
-        if (this.match([TokenType.BANG, TokenType.MINUS])) {
+        while (this.match([TokenType.BANG, TokenType.MINUS])) {
             let operator = this.previous()
             let right = this.unary()
             return new Unary(operator, right)
