@@ -3,7 +3,6 @@ import Scanner from "./Scanner";
 import Token from './Token';
 import { TokenType } from "./TokenType";
 import Parser from './parser';
-import AstPrinter from './AstPrinter';
 import RpnPrinter from './RpnPrinter';
 import Interpreter from './Interpreter';
 import { argv } from 'process';
@@ -13,10 +12,13 @@ let hadError: boolean = false
 let hadRuntimeError = false
 let rpn = false
 
-const main = (args: string[]): void => {
-    if (args[0] === "--rpn") {
+const main = (): void => {
+    let args = argv.slice(2)
+    if (args.includes("rpn")) {
         rpn = true
+        args.splice(args.indexOf("rpn"), 1)
     }
+    console.log(args)
 
     if (args.length > 1) {
         console.log("Usage: jlox [script]")
@@ -104,6 +106,6 @@ const report = (line: number, where: string, message: string): void => {
     hadError = true
 }
 
-main(argv.slice(2))
+main()
 
 export { errorToken, error }

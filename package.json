@@ -1,6 +1,6 @@
 {
   "scripts": {
-    "lox": "ts-node ./src/lox.ts"
+    "start": "ts-node ./src/lox.ts"
   },
   "devDependencies": {
     "@types/node": "^17.0.8"
