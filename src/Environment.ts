@@ -1,27 +1,25 @@
 import Token from './Token';
 
 class Environment {
-    values: { [key: string]: any } = {}
+    values: Map<string, any> = new Map();
 
     get(name: Token) {
-        if (name.lexeme in this.values) {
-            return this.values[name.lexeme]
+        if (this.values.has(name.lexeme)) {
+            return this.values.get(name.lexeme)
         }
-
         throw new Error(`Undefined variable '${name.lexeme}.'`)
     }
 
     assign(name: Token, value: Object): void {
-        if (name.lexeme in this.values) {
-            this.values[name.lexeme] = value
-            return
+        if (this.values.has(name.lexeme)) {
+            this.values.set(name.lexeme, value)
         }
 
         throw new Error(`Undefined variable '${name.lexeme}.'`)
     }
 
     define(name: string, value: Object): void {
-        this.values[name] = value
+        this.values.set(name, value)
     }
 }
 
