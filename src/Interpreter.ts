@@ -24,7 +24,7 @@ class Interpreter implements Visitor<any>, Stmt.Visitor<void> {
         stmt.accept(this)
     }
 
-    public visitExpressionStmt(stmt: Stmt.Expression): void {
+    public visitExpressionStmt(stmt: Stmt.Expression) {
         this.evaluate(stmt.expression)
         return null
     }
@@ -35,7 +35,7 @@ class Interpreter implements Visitor<any>, Stmt.Visitor<void> {
         return null
     }
 
-    public visitVarStmt(stmt: Stmt.Var): void {
+    public visitVarStmt(stmt: Stmt.Var) {
         let value = null
         if (stmt.initializer != null) {
             value = this.evaluate(stmt.initializer)

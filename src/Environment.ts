@@ -1,7 +1,7 @@
 import Token from './Token';
 
 class Environment {
-    values = {}
+    values: { [key: string]: any } = {}
 
     get(name: Token) {
         if (name.lexeme in this.values) {
@@ -11,7 +11,7 @@ class Environment {
         throw new Error(`Undefined variable '${name.lexeme}.'`)
     }
 
-    assign(name, value): void {
+    assign(name: Token, value: Object): void {
         if (name.lexeme in this.values) {
             this.values[name.lexeme] = value
             return
@@ -20,7 +20,7 @@ class Environment {
         throw new Error(`Undefined variable '${name.lexeme}.'`)
     }
 
-    define(name, value): void {
+    define(name: string, value: Object): void {
         this.values[name] = value
     }
 }

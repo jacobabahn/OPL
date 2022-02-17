@@ -34,7 +34,7 @@ class Parser {
             return this.statement()
         } catch(error) {
             this.synchronize()
-            return null
+            return new Stmt.Expression(new Literal(null))
         }
     }
 
@@ -55,7 +55,7 @@ class Parser {
     private varDeclaration = (): Stmt.Stmt => {
         let name = this.consume(TokenType.IDENTIFIER, "Expect variable name.")
 
-        let initializer = null
+        let initializer: Expr = new Literal(null)
         if (this.match([TokenType.EQUAL])) {
             initializer = this.expression()
         }
