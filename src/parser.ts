@@ -1,6 +1,7 @@
 import Token from "./Token"
 import { TokenType } from "./TokenType"
-import { Binary, Unary, Literal, Grouping, Ternary, Expr } from "./Expr"
+import { Binary, Unary, Literal, Grouping, Ternary, Expr, Variable, Assign } from "./Expr"
+import * as Stmt from "./Stmt"
 import { errorToken } from "./lox"
 
 class Parser {
@@ -11,16 +12,80 @@ class Parser {
         this.tokens = tokens
     }
 
-    parse = (): Expr => {
-        try {
-            return this.expression()
-        } catch (error) {
-            return new Literal(null)
+    parse = (): Stmt.Stmt[] => {
+        let statements: Stmt.Stmt[] = []
+        while (!this.isAtEnd()) {
+            statements.push(this.declaration())
         }
+
+        return statements
     }
 
     private expression = (): Expr => {
         return this.ternary()
+    }
+
+    private declaration = (): Stmt.Stmt => {
+        try {
+            if (this.match([TokenType.VAR])) {
+                return this.varDeclaration()
+            }
+
+            return this.statement()
+        } catch(error) {
+            this.synchronize()
+            return null
+        }
+    }
+
+    private statement = (): Stmt.Stmt => {
+        if (this.match([TokenType.PRINT])) {
+            return this.printStatement()
+        }
+
+        return this.expressionStatement()
+    }
+
+    private printStatement = (): Stmt.Stmt => {
+        const value = this.expression()
+        this.consume(TokenType.SEMICOLON, "Expect ';' after value.")
+        return new Stmt.Print(value)
+    }
+
+    private varDeclaration = (): Stmt.Stmt => {
+        let name = this.consume(TokenType.IDENTIFIER, "Expect variable name.")
+
+        let initializer = null
+        if (this.match([TokenType.EQUAL])) {
+            initializer = this.expression()
+        }
+
+        this.consume(TokenType.SEMICOLON, "Expect ';' after variable declaration.")
+        return new Stmt.Var(name, initializer)
+    }
+
+    private expressionStatement = (): Stmt.Stmt => {
+        let expr = this.expression()
+        this.consume(TokenType.SEMICOLON, "Expect ';' after expression.")
+        return new Stmt.Expression(expr)
+    }
+
+    private assignment = (): Expr => {
+        let expr = this.equality()
+
+        if (this.match([TokenType.EQUAL])) {
+            let equals = this.previous()
+            let value = this.assignment()
+
+            if (expr instanceof Variable) {
+                let name = expr.name
+                return new Assign(name, value)
+            }
+
+            this.error(equals, "Invalid assignment target.")
+        }
+
+        return expr
     }
 
     private ternary = (): Expr => {
@@ -103,6 +168,10 @@ class Parser {
 
         if (this.match([TokenType.NUMBER, TokenType.STRING])) {
             return new Literal(this.previous().literal)
+        }
+
+        if (this.match([TokenType.IDENTIFIER])) {
+            return new Variable(this.previous())
         }
 
         if (this.match([TokenType.LEFT_PAREN])) {

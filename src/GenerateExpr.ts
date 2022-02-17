@@ -1,17 +1,25 @@
 import { argv } from 'process'
 import { writeFileSync } from 'fs'
-import Colors from './colors'
+import Colors from '../src/colors'
 
 const dependencies = [
-    'import Token from "./token"'
+    'import Token from "./Token"',
 ]
 
 const expTypes = [
+    "Assign   : name: Token, value: Expr",
     "Binary   : left: Expr, operator: Token, right: Expr",
     "Grouping : expression: Expr",
     "Literal  : value: unknown",
     "Unary    : operator: Token, right: Expr",
-    "Ternary  : operator: Expr, ifTrue: Expr, ifFalse: Expr"
+    "Ternary  : condition: Expr, ifTrue: Expr, ifFalse: Expr",
+    "Variable : name: Token",
+]
+
+const stmtTypes = [
+    "Expression : expression: Expr",
+    "Print      : expression: Expr",
+    "Var        : name: Token, initializer: Expr",
 ]
 
 const defineType = (baseName: string, className: string, fields: string): string => {
@@ -45,10 +53,10 @@ const defineType = (baseName: string, className: string, fields: string): string
     return output
 }
 
-const defineVisitor = (baseName: string) => {
+const defineVisitor = (baseName: string, types: string[]) => {
     let output: string = `export interface Visitor<R> {\n`
     
-    for (const type of expTypes) {
+    for (const type of types) {
         const className = type.split(':')[0].trim()
         output += `    visit${ className + baseName }(${ baseName.toLocaleLowerCase() }: ${ className }): R\n`
     }
@@ -57,19 +65,23 @@ const defineVisitor = (baseName: string) => {
     return output
 }
 
-const defineAst = (path: string, baseName: string) => {
+const defineAst = (path: string, baseName: string, types: string[], expPath?: string) => {
     let output: string = ''
 
     //Add in dependencies
     output += dependencies.join('\n')
 
+    if (expPath) {
+        output += `\nimport { Expr } from "./${ expPath.split('/').pop()?.split('.')[0] }"`
+    }
+
     //Generate the visitor interfaces
-    output += `\n\n${ defineVisitor(baseName) }`
+    output += `\n\n${ defineVisitor(baseName, types) }`
 
     //Generate the base abstract class
     output += `export abstract class ${ baseName } {\n    abstract accept<R>(visitor: Visitor<R>): R\n}\n\n`
 
-    for (const type of expTypes) {
+    for (const type of types) {
         const className = type.split(':')[0].trim()
         const fields = type.substring(type.indexOf(':') + 1).trim()
         output += defineType(baseName, className, fields)
@@ -81,10 +93,17 @@ const defineAst = (path: string, baseName: string) => {
 const main = (): void => {
     const args = argv.slice(2)
 
-    if (args.length !== 1)
-        console.log(`${ Colors.RED }Incorrect arguments.${ Colors.RESET }\nUsage: expgen [path]`)
-    else
-        defineAst(args[0], 'Expr')
+    if (args.length !== 2) {
+        console.log(`
+            ${ Colors.RED }Incorrect arguments.${ Colors.RESET }
+            \n
+            Usage: expgen [exprPath] [stmtPath]
+        `)
+        return
+    }
+
+    defineAst(args[0], 'Expr', expTypes)
+    defineAst(args[1], 'Stmt', stmtTypes, args[0])
 }
 
 main()

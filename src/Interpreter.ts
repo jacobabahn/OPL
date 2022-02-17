@@ -1,8 +1,12 @@
-import { Visitor, Literal, Binary, Unary, Grouping, Ternary, Expr } from "./Expr";
+import { Visitor, Literal, Binary, Unary, Grouping, Ternary, Expr, Variable, Assign } from "./Expr";
+import * as Stmt from "./Stmt";
+import Environment from "./Environment";
 import { TokenType } from "./TokenType";
 import Token from "./Token";
+import { runtimeError } from "./lox";
+import { setMaxListeners } from "process";
 
-class Interpreter implements Visitor<any> {
+class Interpreter implements Visitor<any>, Stmt.Visitor<void> {
 
     public visitLiteralExpr(expr: Literal): any {
         return expr.value
@@ -14,6 +18,37 @@ class Interpreter implements Visitor<any> {
 
     private evaluate = (expr: Expr): any => {
         return expr.accept(this)
+    }
+
+    private execute = (stmt: Stmt.Stmt): void => {
+        stmt.accept(this)
+    }
+
+    public visitExpressionStmt(stmt: Stmt.Expression): void {
+        this.evaluate(stmt.expression)
+        return null
+    }
+
+    public visitPrintStmt(stmt: Stmt.Print) {
+        let value = this.evaluate(stmt.expression)
+        console.log(value)
+        return null
+    }
+
+    public visitVarStmt(stmt: Stmt.Var): void {
+        let value = null
+        if (stmt.initializer != null) {
+            value = this.evaluate(stmt.initializer)
+        }
+
+        this.environment.define(stmt.name.lexeme, value)
+        return null
+    }
+    
+    public visitAssignExpr(expr: Assign) {
+        let value = this.evaluate(expr.value)
+        this.environment.assign(expr.name, value)
+        return value
     }
 
     public visitUnaryExpr(expr: Unary): any {
@@ -30,8 +65,12 @@ class Interpreter implements Visitor<any> {
         return null
     }
 
+    public visitVariableExpr(expr: Variable) {
+        return this.environment.get(expr.name)
+    }
+
     public visitTernaryExpr(expr: Ternary): any {
-        const operator = this.evaluate(expr.operator)
+        const operator = this.evaluate(expr.condition)
 
         if (this.isTruthy(operator)) {
             return this.evaluate(expr.ifTrue)
@@ -120,14 +159,17 @@ class Interpreter implements Visitor<any> {
         return null
     }
 
-    interpret = (expression: Expr): any => {
+    interpret = (statements: Stmt.Stmt[]): any => {
         try {
-            let value = this.evaluate(expression)
-            console.log(value)
+            for (let statement of statements) {
+                this.execute(statement)
+            }
         } catch (error) {
-            console.log(error)
+            runtimeError(error)
         }
     }
+
+    environment = new Environment()
 
 }
 

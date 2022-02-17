@@ -1,4 +1,4 @@
-import { readFileSync } from 'fs';
+import { readFileSync, stat } from 'fs';
 import Scanner from "./Scanner";
 import Token from './Token';
 import { TokenType } from "./TokenType";
@@ -78,14 +78,14 @@ const run = (source: string) => {
     const tokens = scanner.scanTokens()
 
     const parser = new Parser(tokens)
-    const expression = parser.parse()
+    const statements = parser.parse()
 
     if (hadError) 
         return
     if (rpn) {
-        console.log(new RpnPrinter().printExpr(expression))
+        // console.log(new RpnPrinter().printExpr(statements))
     } else {
-        interpreter.interpret(expression)
+        interpreter.interpret(statements)
     }
 }
 
@@ -113,4 +113,4 @@ const report = (line: number, where: string, message: string): void => {
 
 main()
 
-export { errorToken, error }
+export { errorToken, error, runtimeError }
