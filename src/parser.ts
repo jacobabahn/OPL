@@ -41,6 +41,8 @@ class Parser {
     private statement = (): Stmt.Stmt => {
         if (this.match([TokenType.PRINT])) {
             return this.printStatement()
+        } else if (this.match([TokenType.LEFT_BRACE])) {
+            return new Stmt.Block(this.block())
         }
 
         return this.expressionStatement()
@@ -68,6 +70,17 @@ class Parser {
         let expr = this.expression()
         this.consume(TokenType.SEMICOLON, "Expect ';' after expression.")
         return new Stmt.Expression(expr)
+    }
+
+    private block = (): Stmt.Stmt[] => {
+        let statements: Stmt.Stmt[] = []
+
+        while (!this.check(TokenType.RIGHT_BRACE) && !this.isAtEnd()) {
+            statements.push(this.declaration())
+        }
+
+        this.consume(TokenType.RIGHT_BRACE, "Expect '}' after block.")
+        return statements
     }
 
     private assignment = (): Expr => {

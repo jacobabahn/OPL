@@ -1,13 +1,25 @@
-import Token from './Token';
+import Token from './Token'
+import { RuntimeError } from './Interpreter'
 
 class Environment {
-    values: Map<string, any> = new Map();
+    values: Map<string, any>
+    enclosing: Environment | null
 
-    get(name: Token) {
+    constructor(enclosing?: Environment) {
+        this.values = new Map()
+        this.enclosing = enclosing ? enclosing : null
+    }
+
+    get(name: Token): any {
         if (this.values.has(name.lexeme)) {
             return this.values.get(name.lexeme)
         }
-        throw new Error(`Undefined variable '${name.lexeme}.'`)
+
+        if (this.enclosing) {
+            return this.enclosing.get(name)
+        }
+
+        throw new RuntimeError(name, `Undefined variable '${name.lexeme}.'`)
     }
 
     assign(name: Token, value: Object): void {
@@ -15,7 +27,12 @@ class Environment {
             this.values.set(name.lexeme, value)
         }
 
-        throw new Error(`Undefined variable '${name.lexeme}.'`)
+        if (this.enclosing) {
+            this.enclosing.assign(name, value)
+            return
+        }
+
+        throw new RuntimeError(name, `Undefined variable '${name.lexeme}.'`)
     }
 
     define(name: string, value: Object): void {

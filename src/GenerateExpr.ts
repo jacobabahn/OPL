@@ -17,6 +17,7 @@ const expTypes = [
 ]
 
 const stmtTypes = [
+    "Block      : statements: Stmt[]",
     "Expression : expression: Expr",
     "Print      : expression: Expr",
     "Var        : name: Token, initializer: Expr",

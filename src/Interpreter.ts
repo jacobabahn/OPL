@@ -8,11 +8,11 @@ import { setMaxListeners } from "process";
 
 class Interpreter implements Visitor<any>, Stmt.Visitor<void> {
 
-    public visitLiteralExpr(expr: Literal): any {
+    public visitLiteralExpr(expr: Literal) {
         return expr.value
     }
 
-    public visitGroupingExpr(expr: Grouping): any {
+    public visitGroupingExpr(expr: Grouping) {
         return this.evaluate(expr.expression)
     }
 
@@ -22,6 +22,23 @@ class Interpreter implements Visitor<any>, Stmt.Visitor<void> {
 
     private execute = (stmt: Stmt.Stmt): void => {
         stmt.accept(this)
+    }
+
+    executeBlock(statements: Stmt.Stmt[], environment: Environment) {
+        let previous = this.environment
+        try {
+            this.environment = environment
+            for (let statement of statements) {
+                this.execute(statement)
+            }
+        } finally {
+            this.environment = previous
+        }
+    }
+
+    public visitBlockStmt(stmt: Stmt.Block) {
+        this.executeBlock(stmt.statements, new Environment(this.environment))
+        return null
     }
 
     public visitExpressionStmt(stmt: Stmt.Expression) {
@@ -51,7 +68,7 @@ class Interpreter implements Visitor<any>, Stmt.Visitor<void> {
         return value
     }
 
-    public visitUnaryExpr(expr: Unary): any {
+    public visitUnaryExpr(expr: Unary) {
         const right = this.evaluate(expr.right)
 
         switch (expr.operator.type) {
@@ -69,7 +86,7 @@ class Interpreter implements Visitor<any>, Stmt.Visitor<void> {
         return this.environment.get(expr.name)
     }
 
-    public visitTernaryExpr(expr: Ternary): any {
+    public visitTernaryExpr(expr: Ternary) {
         const operator = this.evaluate(expr.condition)
 
         if (this.isTruthy(operator)) {
@@ -116,7 +133,7 @@ class Interpreter implements Visitor<any>, Stmt.Visitor<void> {
         return a === (b)
     }
 
-    public visitBinaryExpr(expr: Binary): any {
+    public visitBinaryExpr(expr: Binary) {
         const left = this.evaluate(expr.left)
         const right = this.evaluate(expr.right)
 
@@ -159,7 +176,7 @@ class Interpreter implements Visitor<any>, Stmt.Visitor<void> {
         return null
     }
 
-    interpret = (statements: Stmt.Stmt[]): any => {
+    interpret = (statements: Stmt.Stmt[]) => {
         try {
             for (let statement of statements) {
                 this.execute(statement)
@@ -182,4 +199,4 @@ class RuntimeError extends Error {
     }
 }
 
-export default Interpreter
+export { Interpreter, RuntimeError }

@@ -4,7 +4,7 @@ import Token from './Token';
 import { TokenType } from "./TokenType";
 import Parser from './parser';
 import RpnPrinter from './RpnPrinter';
-import Interpreter from './Interpreter';
+import { Interpreter } from './Interpreter';
 import { argv } from 'process';
 
 const interpreter = new Interpreter()
