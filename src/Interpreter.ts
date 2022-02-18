@@ -1,4 +1,4 @@
-import { Visitor, Literal, Binary, Unary, Grouping, Ternary, Expr, Variable, Assign } from "./Expr";
+import { Visitor, Literal, Binary, Unary, Grouping, Ternary, Expr, Variable, Assign, Logical } from "./Expr";
 import * as Stmt from "./Stmt";
 import Environment from "./Environment";
 import { TokenType } from "./TokenType";
@@ -10,6 +10,18 @@ class Interpreter implements Visitor<any>, Stmt.Visitor<void> {
 
     public visitLiteralExpr(expr: Literal) {
         return expr.value
+    }
+
+    public visitLogicalExpr(expr: Logical) {
+        let left = this.evaluate(expr.left)
+
+        if (expr.operator.type === TokenType.OR) {
+            if (this.isTruthy(left)) return left
+        } else {
+            if (!this.isTruthy(left)) return left
+        }
+
+        return this.evaluate(expr.right)
     }
 
     public visitGroupingExpr(expr: Grouping) {
@@ -46,6 +58,15 @@ class Interpreter implements Visitor<any>, Stmt.Visitor<void> {
         return null
     }
 
+    public visitIfStmt(stmt: Stmt.If) {
+        if (this.isTruthy(this.evaluate(stmt.condition))) {
+            this.execute(stmt.thenBranch)
+        } else if (stmt.elseBranch) {
+            this.execute(stmt.elseBranch)
+        }
+        return null
+    }
+
     public visitPrintStmt(stmt: Stmt.Print) {
         let value = this.evaluate(stmt.expression)
         console.log(value)
@@ -59,6 +80,14 @@ class Interpreter implements Visitor<any>, Stmt.Visitor<void> {
         }
 
         this.environment.define(stmt.name.lexeme, value)
+        return null
+    }
+
+    public visitWhileStmt(stmt: Stmt.While) {
+        while (this.isTruthy(this.evaluate(stmt.condition))) {
+            this.execute(stmt.body)
+        }
+
         return null
     }
     

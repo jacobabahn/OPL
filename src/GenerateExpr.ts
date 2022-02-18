@@ -11,6 +11,7 @@ const expTypes = [
     "Binary   : left: Expr, operator: Token, right: Expr",
     "Grouping : expression: Expr",
     "Literal  : value: unknown",
+    "Logical  : left: Expr, operator: Token, right: Expr",
     "Unary    : operator: Token, right: Expr",
     "Ternary  : condition: Expr, ifTrue: Expr, ifFalse: Expr",
     "Variable : name: Token",
@@ -19,8 +20,10 @@ const expTypes = [
 const stmtTypes = [
     "Block      : statements: Stmt[]",
     "Expression : expression: Expr",
+    "If         : condition: Expr, thenBranch: Stmt, elseBranch: Stmt",
     "Print      : expression: Expr",
     "Var        : name: Token, initializer: Expr",
+    "While      : condition: Expr, body: Stmt",
 ]
 
 const defineType = (baseName: string, className: string, fields: string): string => {
