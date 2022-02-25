@@ -1,9 +1,14 @@
 {
   "scripts": {
     "start": "ts-node ./src/lox.ts",
-    "test": "node ./test_tlox.mjs"
+    "test": "node ./test_tlox.mjs",
+    "debug": "nodemon --config nodemon.json --inspect-brk src/lox.ts"
   },
   "devDependencies": {
-    "@types/node": "^17.0.8"
+    "@types/node": "^17.0.8",
+    "ts-node": "^10.5.0"
+  },
+  "dependencies": {
+    "nodemon": "^2.0.15"
   }
 }

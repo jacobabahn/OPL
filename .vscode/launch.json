@@ -6,6 +6,13 @@
     "configurations": [
         {
             "type": "node",
+            "request": "attach",
+            "name": "Attach",
+            "restart": true,
+            "processId": "${command:PickProcess}"
+        },
+        {
+            "type": "node",
             "request": "launch",
             "name": "Launch Program",
             "skipFiles": [

@@ -7,6 +7,8 @@ import { errorToken } from "./lox"
 class Parser {
     private tokens: Token[]
     private current: number = 0
+    private allowExpr: boolean = false
+    private foundExpr: boolean = false
 
     constructor(tokens: Token[]) {
         this.tokens = tokens
@@ -21,8 +23,25 @@ class Parser {
         return statements
     }
 
+    parseRepl = () => {
+        this.allowExpr = true
+        let statements: Stmt.Stmt[] = []
+        while (!this.isAtEnd()) {
+            statements.push(this.declaration())
+
+            if (this.foundExpr) {
+                let last = statements[statements.length - 1]
+                return (last as Stmt.Expression).expression
+            }
+
+            this.allowExpr = false
+        }
+
+        return statements
+    }
+
     private expression = (): Expr => {
-        return this.ternary()
+        return this.assignment()
     }
 
     private declaration = (): Stmt.Stmt => {
@@ -86,10 +105,12 @@ class Parser {
                 new Stmt.Expression(increment)
             ])
         }
-        if (condition) {
+        if (!condition) {
             condition = new Literal(true)
-            body = new Stmt.While(condition, body)
         }
+        
+        body = new Stmt.While(condition, body)
+
         if (initializer) {
             body = new Stmt.Block([initializer, body])
         }
@@ -140,7 +161,13 @@ class Parser {
 
     private expressionStatement = (): Stmt.Stmt => {
         let expr = this.expression()
-        this.consume(TokenType.SEMICOLON, "Expect ';' after expression.")
+
+        if (this.allowExpr && this.isAtEnd()) {
+            this.foundExpr = true
+        } else {
+            this.consume(TokenType.SEMICOLON, "Expect ';' after expression.")
+        }
+
         return new Stmt.Expression(expr)
     }
 

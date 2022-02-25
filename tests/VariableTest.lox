@@ -1,0 +1,6 @@
+var a = "test";
+
+a = "notTest";
+print a;
+
+>>> notTest

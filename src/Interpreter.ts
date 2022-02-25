@@ -84,6 +84,8 @@ class Interpreter implements Visitor<any>, Stmt.Visitor<void> {
     }
 
     public visitWhileStmt(stmt: Stmt.While) {
+        // let temp = this.evaluate((stmt.condition as Binary).left)
+        // console.log(temp)
         while (this.isTruthy(this.evaluate(stmt.condition))) {
             this.execute(stmt.body)
         }
@@ -212,6 +214,15 @@ class Interpreter implements Visitor<any>, Stmt.Visitor<void> {
             }
         } catch (error) {
             runtimeError(error)
+        }
+    }
+
+    interpretExpr = (expression: Expr) => {
+        try {
+            return this.evaluate(expression).toString()
+        } catch (error) {
+            runtimeError(error)
+            return null
         }
     }
 
