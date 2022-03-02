@@ -68,6 +68,8 @@ class Parser {
             return this.whileStatement()
         } else if (this.match([TokenType.LEFT_BRACE])) {
             return new Stmt.Block(this.block())
+        } else if (this.match([TokenType.EXIT])) {
+            process.exit()
         }
 
         return this.expressionStatement()
@@ -392,12 +394,6 @@ class Parser {
             this.advance()
         }
     }
-
-    // static parseError = class ParseError{
-    //     constructor() {
-    //         throw new Error("ParseError")
-    //     }
-    // }
 }
 
 class ParseError extends Error {}

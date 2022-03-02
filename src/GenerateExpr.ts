@@ -24,6 +24,7 @@ const stmtTypes = [
     "Print      : expression: Expr",
     "Var        : name: Token, initializer: Expr",
     "While      : condition: Expr, body: Stmt",
+    "Exit       : value: Expr",
 ]
 
 const defineType = (baseName: string, className: string, fields: string): string => {
