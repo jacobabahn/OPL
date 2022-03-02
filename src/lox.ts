@@ -6,6 +6,8 @@ import Parser from './parser';
 import RpnPrinter from './RpnPrinter';
 import { Interpreter } from './Interpreter';
 import { argv } from 'process';
+import * as Stmt from './Stmt';
+import { Expr } from './Expr';
 
 const interpreter = new Interpreter()
 let hadError: boolean = false
@@ -78,14 +80,18 @@ const run = (source: string) => {
     const tokens = scanner.scanTokens()
 
     const parser = new Parser(tokens)
-    const statements = parser.parse()
+    const statements = parser.parseRepl()
 
     if (hadError) 
         return
     if (rpn) {
         // console.log(new RpnPrinter().printExpr(statements))
     } else {
-        interpreter.interpret(statements)
+        if (statements instanceof Stmt.Stmt) {
+            interpreter.interpret(statements as any)
+        } else if (statements instanceof Expr) {
+            interpreter.interpretExpr(statements as Expr)
+        }
     }
 }
 

@@ -23,7 +23,7 @@ class Parser {
         return statements
     }
 
-    parseRepl = () => {
+    parseRepl = (): any => {
         this.allowExpr = true
         let statements: Stmt.Stmt[] = []
         while (!this.isAtEnd()) {
