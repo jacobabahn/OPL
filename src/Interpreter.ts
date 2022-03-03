@@ -84,11 +84,17 @@ class Interpreter implements Visitor<any>, Stmt.Visitor<void> {
     }
 
     public visitWhileStmt(stmt: Stmt.While) {
-        while (this.isTruthy(this.evaluate(stmt.condition))) {
-            this.execute(stmt.body)
-        }
+        try {
+            while (this.isTruthy(this.evaluate(stmt.condition))) {
+                this.execute(stmt.body)
+            }
+        } catch(error){}
 
         return null
+    }
+
+    public visitBreakStmt(stmt: Stmt.Break) {
+        throw new BreakException()
     }
     
     public visitAssignExpr(expr: Assign) {
@@ -235,6 +241,10 @@ class RuntimeError extends Error {
         super(message)
         this.token = token
     }
+}
+
+class BreakException extends Error {
+
 }
 
 export { Interpreter, RuntimeError }

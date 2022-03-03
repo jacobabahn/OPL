@@ -9,9 +9,12 @@ class Parser {
     private current: number = 0
     private allowExpr: boolean = false
     private foundExpr: boolean = false
+    private repl: boolean = false
+    private numLoops: number = 0
 
-    constructor(tokens: Token[]) {
+    constructor(tokens: Token[], repl: boolean = false) {
         this.tokens = tokens
+        this.repl = repl
     }
 
     parse = (): Stmt.Stmt[] => {
@@ -59,17 +62,21 @@ class Parser {
 
     private statement = (): Stmt.Stmt => {
         if (this.match([TokenType.FOR])) {
+            this.numLoops++
             return this.forStatement()
         } else if (this.match([TokenType.IF])) {
             return this.ifStatement()
         } else if (this.match([TokenType.PRINT])) {
             return this.printStatement()
         } else if (this.match([TokenType.WHILE])) {
+            this.numLoops++
             return this.whileStatement()
         } else if (this.match([TokenType.LEFT_BRACE])) {
             return new Stmt.Block(this.block())
         } else if (this.match([TokenType.EXIT])) {
             process.exit()
+        } else if (this.match([TokenType.BREAK])) {
+            return this.breakStatement()
         }
 
         return this.expressionStatement()
@@ -101,23 +108,28 @@ class Parser {
 
         let body = this.statement()
 
-        if (increment) {
-            body = new Stmt.Block([
-                body,
-                new Stmt.Expression(increment)
-            ])
-        }
-        if (!condition) {
-            condition = new Literal(true)
-        }
-        
-        body = new Stmt.While(condition, body)
+        try {
+            // this.numLoops++
+            if (increment) {
+                body = new Stmt.Block([
+                    body,
+                    new Stmt.Expression(increment)
+                ])
+            }
+            if (!condition) {
+                condition = new Literal(true)
+            }
+            
+            body = new Stmt.While(condition, body)
 
-        if (initializer) {
-            body = new Stmt.Block([initializer, body])
-        }
+            if (initializer) {
+                body = new Stmt.Block([initializer, body])
+            }
 
-        return body
+            return body
+        } finally {
+            this.numLoops--
+        }
     }
 
     private ifStatement = (): Stmt.Stmt => {
@@ -140,6 +152,15 @@ class Parser {
         return new Stmt.Print(value)
     }
 
+    private breakStatement = (): Stmt.Stmt => {
+        if (this.numLoops === 0) {
+            errorToken(this.previous(), "Cannot use 'break' outside of a loop.")
+        }
+
+        this.consume(TokenType.SEMICOLON, "Expect ';' after 'break'.")
+        return new Stmt.Break()
+    }
+
     private varDeclaration = (): Stmt.Stmt => {
         let name = this.consume(TokenType.IDENTIFIER, "Expect variable name.")
 
@@ -156,13 +177,22 @@ class Parser {
         this.consume(TokenType.LEFT_PAREN, "Expect '(' after 'while'.")
         let condition = this.expression()
         this.consume(TokenType.RIGHT_PAREN, "Expect ')' after condition.")
-        let body = this.statement()
-
-        return new Stmt.While(condition, body)
+        try {
+            this.numLoops++
+            let body = this.statement()
+            console.log(this.numLoops)
+            return new Stmt.While(condition, body)
+        } finally {
+            this.numLoops--
+        }
     }
 
     private expressionStatement = (): Stmt.Stmt => {
         let expr = this.expression()
+
+        // if (this.repl) {
+        //     return 
+        // }
 
         if (this.allowExpr && this.isAtEnd()) {
             this.foundExpr = true

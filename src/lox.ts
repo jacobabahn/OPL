@@ -13,7 +13,6 @@ const interpreter = new Interpreter()
 let hadError: boolean = false
 let hadRuntimeError = false
 let rpn = false
-let print = true
 
 const main = (): void => {
     let args = argv.slice(2)
@@ -23,7 +22,6 @@ const main = (): void => {
     }
     if (args.includes("no-output")) {
         args.splice(args.indexOf("no-output"), 1)
-        print = false
     }
 
     if (args.length > 1) {
@@ -59,13 +57,13 @@ const runPrompt = (): void => {
     })
 
     const promptLoop = () => {
-        line.question(">", (response: string) => {
+        line.question("> ", (response: string) => {
             if (response === null) {
                 // process.exit(1)
                 // return
             }
 
-            run(response)
+            run(response, true)
 
             hadError = false
             promptLoop()
@@ -75,23 +73,28 @@ const runPrompt = (): void => {
     promptLoop()
 }
 
-const run = (source: string) => {
+const run = (source: string, repl?: boolean) => {
     const scanner = new Scanner(source)
     const tokens = scanner.scanTokens()
 
-    const parser = new Parser(tokens)
-    const statements = parser.parseRepl()
+    const parser = new Parser(tokens, repl)
+    const statements = parser.parse()
 
-    if (hadError) 
+
+    // if (statements.length === 1 && statements[0].type === "expression") {
+    //     console.log(interpreter.evaluate(st1atements[0]))
+    // }
+
+    if (hadError) {
         return
-    if (rpn) {
-        // console.log(new RpnPrinter().printExpr(statements))
     } else {
-        if (statements instanceof Stmt.Stmt) {
-            interpreter.interpret(statements as any)
-        } else if (statements instanceof Expr) {
-            interpreter.interpretExpr(statements as Expr)
-        }
+        // if (statements instanceof Stmt.Stmt) {
+        //     interpreter.interpret(statements as any)
+        // } else if (statements instanceof Expr) {
+        //     interpreter.interpretExpr(statements as Expr)
+        // }
+
+        interpreter.interpret(statements)
     }
 }
 
