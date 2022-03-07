@@ -78,23 +78,19 @@ const run = (source: string, repl?: boolean) => {
     const tokens = scanner.scanTokens()
 
     const parser = new Parser(tokens, repl)
-    const statements = parser.parse()
-
-
-    // if (statements.length === 1 && statements[0].type === "expression") {
-    //     console.log(interpreter.evaluate(st1atements[0]))
-    // }
+    const statements = parser.parseRepl()
 
     if (hadError) {
         return
     } else {
-        // if (statements instanceof Stmt.Stmt) {
-        //     interpreter.interpret(statements as any)
-        // } else if (statements instanceof Expr) {
-        //     interpreter.interpretExpr(statements as Expr)
-        // }
-
-        interpreter.interpret(statements)
+        if (statements instanceof Array) {
+            interpreter.interpret(statements as any)
+        } else if (statements instanceof Expr) {
+            let result = interpreter.interpretExpr(statements as Expr)
+            if (result) {
+                console.log(result)
+            }
+        }
     }
 }
 

@@ -58,6 +58,10 @@ class Interpreter implements Visitor<any>, Stmt.Visitor<void> {
         return null
     }
 
+    public visitExitStmt(stmt: Stmt.Exit): void {
+        process.exit(0)
+    }
+
     public visitIfStmt(stmt: Stmt.If) {
         if (this.isTruthy(this.evaluate(stmt.condition))) {
             this.execute(stmt.thenBranch)
@@ -93,8 +97,30 @@ class Interpreter implements Visitor<any>, Stmt.Visitor<void> {
         return null
     }
 
+    public visitSwitchStmt(stmt: Stmt.Switch) {
+        for (let item of stmt.cases) {
+            if (this.isEqual(this.evaluate(item.condition), this.evaluate(stmt.condition))) {
+                this.execute(item.body)
+                return
+            }
+        }
+
+        if (stmt.defaultCase) {
+            this.execute(stmt.defaultCase)
+        }
+        return null
+    }
+
+    public visitCaseStmt(stmt: Stmt.Case) {
+        this.execute(stmt)
+    }
+
     public visitBreakStmt(stmt: Stmt.Break) {
         throw new BreakException()
+    }
+
+    public visitContinueStmt(stmt: Stmt.Continue) {
+        throw new ContinueException()
     }
     
     public visitAssignExpr(expr: Assign) {
@@ -211,6 +237,21 @@ class Interpreter implements Visitor<any>, Stmt.Visitor<void> {
         return null
     }
 
+    private stringify = (object: any): string => {
+        if (object === null) {
+            return 'nil'
+        }
+
+        if (typeof object === 'number') {
+            let text = object.toString()
+            if (text.endsWith('.0')) {
+                text = text.substring(0, text.length - 2)
+            }
+            return text
+        }
+        return object.toString()
+    }
+
     interpret = (statements: Stmt.Stmt[]) => {
         try {
             for (let statement of statements) {
@@ -223,7 +264,7 @@ class Interpreter implements Visitor<any>, Stmt.Visitor<void> {
 
     interpretExpr = (expression: Expr) => {
         try {
-            return this.evaluate(expression).toString()
+            return this.stringify(this.evaluate(expression))
         } catch (error) {
             runtimeError(error)
             return null
@@ -244,7 +285,17 @@ class RuntimeError extends Error {
 }
 
 class BreakException extends Error {
+    constructor() {
+        super("Break")
+        Object.setPrototypeOf(this, BreakException.prototype)
+    }
+}
 
+class ContinueException extends Error {
+    constructor() {
+        super("Continue")
+        Object.setPrototypeOf(this, ContinueException.prototype)
+    }
 }
 
 export { Interpreter, RuntimeError }

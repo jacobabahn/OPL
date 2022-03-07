@@ -20,11 +20,15 @@ const expTypes = [
 const stmtTypes = [
     "Block      : statements: Stmt[]",
     "Break      : ",
+    "Continue   : ",
+    "Exit       : ",
     "Expression : expression: Expr",
     "If         : condition: Expr, thenBranch: Stmt, elseBranch: Stmt",
     "Print      : expression: Expr",
     "Var        : name: Token, initializer: Expr",
     "While      : condition: Expr, body: Stmt",
+    "Switch     : condition: Expr, cases: Case[], defaultCase: Stmt",
+    "Case       : condition: Expr, body: Stmt",
 ]
 
 const defineType = (baseName: string, className: string, fields: string): string => {

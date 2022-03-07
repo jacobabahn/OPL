@@ -185,8 +185,12 @@ class Scanner {
     keywords = new Map([
         ["and", TokenType.AND],
         ["break", TokenType.BREAK],
+        ["case", TokenType.CASE],
         ["class", TokenType.CLASS],
+        ["continue", TokenType.CONTINUE],
+        ["default", TokenType.DEFAULT],
         ["else", TokenType.ELSE],
+        ["exit", TokenType.EXIT],
         ["false", TokenType.FALSE],
         ["for", TokenType.FOR],
         ["fun", TokenType.FUN],
@@ -196,11 +200,11 @@ class Scanner {
         ["print", TokenType.PRINT],
         ["return", TokenType.RETURN],
         ["super", TokenType.SUPER],
+        ["switch", TokenType.SWITCH],
         ["this", TokenType.THIS],
         ["true", TokenType.TRUE],
         ["var", TokenType.VAR],
         ["while", TokenType.WHILE],
-        ["exit", TokenType.EXIT],
     ])
 
 }

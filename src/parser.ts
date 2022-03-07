@@ -9,12 +9,10 @@ class Parser {
     private current: number = 0
     private allowExpr: boolean = false
     private foundExpr: boolean = false
-    private repl: boolean = false
     private numLoops: number = 0
 
     constructor(tokens: Token[], repl: boolean = false) {
         this.tokens = tokens
-        this.repl = repl
     }
 
     parse = (): Stmt.Stmt[] => {
@@ -74,12 +72,22 @@ class Parser {
         } else if (this.match([TokenType.LEFT_BRACE])) {
             return new Stmt.Block(this.block())
         } else if (this.match([TokenType.EXIT])) {
-            process.exit()
+            return this.exitStatement()
         } else if (this.match([TokenType.BREAK])) {
             return this.breakStatement()
+        } else if (this.match([TokenType.CONTINUE])) {
+            return this.continueStatement()
+        } else if (this.match([TokenType.SWITCH])) {
+            return this.switchStatement()
         }
 
         return this.expressionStatement()
+    }
+
+    private exitStatement = (): Stmt.Stmt => {
+        this.consume(TokenType.SEMICOLON, "Expected ';' after 'exit'.")
+
+        return new Stmt.Exit()
     }
 
     private forStatement = (): Stmt.Stmt => {
@@ -132,6 +140,59 @@ class Parser {
         }
     }
 
+    private whileStatement = (): Stmt.Stmt => {
+        this.consume(TokenType.LEFT_PAREN, "Expect '(' after 'while'.")
+        let condition = this.expression()
+        this.consume(TokenType.RIGHT_PAREN, "Expect ')' after condition.")
+        try {
+            this.numLoops++
+            let body = this.statement()
+            return new Stmt.While(condition, body)
+        } finally {
+            this.numLoops--
+        }
+    }
+
+    private switchStatement = (): Stmt.Stmt => {
+        this.consume(TokenType.LEFT_PAREN, "Expect '(' after 'switch'.")
+        let expr = this.expression()
+        this.consume(TokenType.RIGHT_PAREN, "Expect ')' after switch expression.")
+
+        this.consume(TokenType.LEFT_BRACE, "Expect '{' after switch expression.")
+
+        let cases: Stmt.Case[] = []
+        let defaultCase: Stmt.Stmt = new Stmt.Expression(new Literal(null))
+        let defaultCount = 0
+
+        while (!this.check(TokenType.RIGHT_BRACE) && !this.isAtEnd()) {
+            if (this.match([TokenType.DEFAULT])) {
+                if (defaultCount !== 0) {
+                    this.error(this.previous(), "Only one default branch allowed.")
+                    this.synchronize()
+                } else {
+                    this.consume(TokenType.COLON, "Expect ':' after default.")
+                    defaultCase = this.statement()
+                    defaultCount++
+                }
+            } else if (this.match([TokenType.CASE])) {
+                if (defaultCount !== 0) {
+                    this.error(this.previous(), "'default' must be the last branch.")
+                }
+
+                let expr = this.expression()
+                this.consume(TokenType.COLON, "Expect ':' after case expression.")
+                cases.push(new Stmt.Case(expr, this.statement()))
+            } else {
+                this.error(this.peek(), 'Every branch of a switch must begin with case or default.')
+                this.synchronize()
+            }
+        }
+
+        this.consume(TokenType.RIGHT_BRACE, "Expect '}' after all cases.")
+
+        return new Stmt.Switch(expr, cases, defaultCase)
+    }
+
     private ifStatement = (): Stmt.Stmt => {
         this.consume(TokenType.LEFT_PAREN, "Expect '(' after 'if'.")
         let condition = this.expression()
@@ -161,6 +222,15 @@ class Parser {
         return new Stmt.Break()
     }
 
+    private continueStatement = (): Stmt.Stmt => {
+        if (this.numLoops === 0) {
+            errorToken(this.previous(), "Cannot use 'continue' outside of a loop.")
+        }
+        
+        this.consume(TokenType.SEMICOLON, "Expect ';' after 'continue'.")
+        return new Stmt.Continue()
+    }
+
     private varDeclaration = (): Stmt.Stmt => {
         let name = this.consume(TokenType.IDENTIFIER, "Expect variable name.")
 
@@ -173,26 +243,8 @@ class Parser {
         return new Stmt.Var(name, initializer)
     }
 
-    private whileStatement = (): Stmt.Stmt => {
-        this.consume(TokenType.LEFT_PAREN, "Expect '(' after 'while'.")
-        let condition = this.expression()
-        this.consume(TokenType.RIGHT_PAREN, "Expect ')' after condition.")
-        try {
-            this.numLoops++
-            let body = this.statement()
-            console.log(this.numLoops)
-            return new Stmt.While(condition, body)
-        } finally {
-            this.numLoops--
-        }
-    }
-
     private expressionStatement = (): Stmt.Stmt => {
         let expr = this.expression()
-
-        // if (this.repl) {
-        //     return 
-        // }
 
         if (this.allowExpr && this.isAtEnd()) {
             this.foundExpr = true
@@ -396,10 +448,6 @@ class Parser {
     }
 
     private error = (token: Token, message: string): any => {
-        // let instance = new Lox()
-        // instance.errorToken(token, message)
-        // return new ParseError()
-
         errorToken(token, message)
         return new ParseError()
     }
@@ -419,6 +467,7 @@ class Parser {
                 case TokenType.WHILE:
                 case TokenType.PRINT:
                 case TokenType.RETURN: return;
+                case TokenType.SWITCH:
             }
 
             this.advance()

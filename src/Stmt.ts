@@ -4,11 +4,15 @@ import { Expr } from "./Expr"
 export interface Visitor<R> {
     visitBlockStmt(stmt: Block): R
     visitBreakStmt(stmt: Break): R
+    visitContinueStmt(stmt: Continue): R
+    visitExitStmt(stmt: Exit): R
     visitExpressionStmt(stmt: Expression): R
     visitIfStmt(stmt: If): R
     visitPrintStmt(stmt: Print): R
     visitVarStmt(stmt: Var): R
     visitWhileStmt(stmt: While): R
+    visitSwitchStmt(stmt: Switch): R
+    visitCaseStmt(stmt: Case): R
 }
 
 export abstract class Stmt {
@@ -36,6 +40,28 @@ export class Break extends Stmt {
 
     accept = <R>(visitor: Visitor<R>): R => {
         return visitor.visitBreakStmt(this)
+    }
+}
+
+export class Continue extends Stmt {
+
+    constructor() {
+        super()
+    }
+
+    accept = <R>(visitor: Visitor<R>): R => {
+        return visitor.visitContinueStmt(this)
+    }
+}
+
+export class Exit extends Stmt {
+
+    constructor() {
+        super()
+    }
+
+    accept = <R>(visitor: Visitor<R>): R => {
+        return visitor.visitExitStmt(this)
     }
 }
 
@@ -109,5 +135,37 @@ export class While extends Stmt {
 
     accept = <R>(visitor: Visitor<R>): R => {
         return visitor.visitWhileStmt(this)
+    }
+}
+
+export class Switch extends Stmt {
+    readonly condition: Expr
+    readonly cases: Case[]
+    readonly defaultCase: Stmt
+
+    constructor(condition: Expr, cases: Case[], defaultCase: Stmt) {
+        super()
+        this.condition = condition
+        this.cases = cases
+        this.defaultCase = defaultCase
+    }
+
+    accept = <R>(visitor: Visitor<R>): R => {
+        return visitor.visitSwitchStmt(this)
+    }
+}
+
+export class Case extends Stmt {
+    readonly condition: Expr
+    readonly body: Stmt
+
+    constructor(condition: Expr, body: Stmt) {
+        super()
+        this.condition = condition
+        this.body = body
+    }
+
+    accept = <R>(visitor: Visitor<R>): R => {
+        return visitor.visitCaseStmt(this)
     }
 }
