@@ -67,7 +67,7 @@ class Parser {
         } else if (this.match([TokenType.PRINT])) {
             return this.printStatement()
         } else if (this.match([TokenType.WHILE])) {
-            this.numLoops++
+            // this.numLoops++
             return this.whileStatement()
         } else if (this.match([TokenType.LEFT_BRACE])) {
             return new Stmt.Block(this.block())
@@ -85,7 +85,7 @@ class Parser {
     }
 
     private exitStatement = (): Stmt.Stmt => {
-        this.consume(TokenType.SEMICOLON, "Expected ';' after 'exit'.")
+        this.consume(TokenType.SEMICOLON, "Expect ';' after exit.")
 
         return new Stmt.Exit()
     }
@@ -117,7 +117,7 @@ class Parser {
         let body = this.statement()
 
         try {
-            // this.numLoops++
+            this.numLoops++
             if (increment) {
                 body = new Stmt.Block([
                     body,
@@ -128,7 +128,7 @@ class Parser {
                 condition = new Literal(true)
             }
             
-            body = new Stmt.While(condition, body)
+            body = new Stmt.While(condition, body, false)
 
             if (initializer) {
                 body = new Stmt.Block([initializer, body])
@@ -147,7 +147,7 @@ class Parser {
         try {
             this.numLoops++
             let body = this.statement()
-            return new Stmt.While(condition, body)
+            return new Stmt.While(condition, body, true)
         } finally {
             this.numLoops--
         }
@@ -156,9 +156,9 @@ class Parser {
     private switchStatement = (): Stmt.Stmt => {
         this.consume(TokenType.LEFT_PAREN, "Expect '(' after 'switch'.")
         let expr = this.expression()
-        this.consume(TokenType.RIGHT_PAREN, "Expect ')' after switch expression.")
+        this.consume(TokenType.RIGHT_PAREN, "Expect ')' after switch target.")
 
-        this.consume(TokenType.LEFT_BRACE, "Expect '{' after switch expression.")
+        this.consume(TokenType.LEFT_BRACE, "Expect '{' after switch and target.")
 
         let cases: Stmt.Case[] = []
         let defaultCase: Stmt.Stmt = new Stmt.Expression(new Literal(null))
@@ -167,10 +167,10 @@ class Parser {
         while (!this.check(TokenType.RIGHT_BRACE) && !this.isAtEnd()) {
             if (this.match([TokenType.DEFAULT])) {
                 if (defaultCount !== 0) {
-                    this.error(this.previous(), "Only one default branch allowed.")
+                    this.error(this.previous(), "Only 1 default branch allowed.")
                     this.synchronize()
                 } else {
-                    this.consume(TokenType.COLON, "Expect ':' after default.")
+                    this.consume(TokenType.COLON, "Expect ':' after 'default'.")
                     defaultCase = this.statement()
                     defaultCount++
                 }
@@ -183,7 +183,7 @@ class Parser {
                 this.consume(TokenType.COLON, "Expect ':' after case expression.")
                 cases.push(new Stmt.Case(expr, this.statement()))
             } else {
-                this.error(this.peek(), 'Every branch of a switch must begin with case or default.')
+                this.error(this.peek(), "Every branch of switch must begin with 'case' or 'default'.")
                 this.synchronize()
             }
         }
@@ -215,7 +215,7 @@ class Parser {
 
     private breakStatement = (): Stmt.Stmt => {
         if (this.numLoops === 0) {
-            errorToken(this.previous(), "Cannot use 'break' outside of a loop.")
+            errorToken(this.previous(), "'break' is only allowed in a loop.")
         }
 
         this.consume(TokenType.SEMICOLON, "Expect ';' after 'break'.")
@@ -224,7 +224,7 @@ class Parser {
 
     private continueStatement = (): Stmt.Stmt => {
         if (this.numLoops === 0) {
-            errorToken(this.previous(), "Cannot use 'continue' outside of a loop.")
+            errorToken(this.previous(), "'continue' is only allowed in a loop.")
         }
         
         this.consume(TokenType.SEMICOLON, "Expect ';' after 'continue'.")
@@ -451,24 +451,32 @@ class Parser {
         errorToken(token, message)
         return new ParseError()
     }
-
     private synchronize = (): void => {
         this.advance()
 
-        while (!this.isAtEnd()) {
-            if (this.previous().type === TokenType.SEMICOLON) return
+        while(!this.isAtEnd()) {
+            if (this.previous().type === TokenType.SEMICOLON)
+                return
 
-            switch (this.peek().type) {
-                case TokenType.CLASS:
-                case TokenType.FUN:
-                case TokenType.VAR:
-                case TokenType.FOR:
-                case TokenType.IF:
-                case TokenType.WHILE:
-                case TokenType.PRINT:
-                case TokenType.RETURN: return;
-                case TokenType.SWITCH:
-            }
+            const type = this.peek().type
+            if (type === TokenType.CLASS)
+                break
+            if (type === TokenType.FUN)
+                break
+            if (type === TokenType.VAR)
+                break
+            if (type === TokenType.FOR)
+                break
+            if (type === TokenType.IF)
+                break
+            if (type === TokenType.WHILE)
+                break
+            if (type === TokenType.PRINT)
+                break
+            if (type === TokenType.SWITCH)
+                break
+            if (type === TokenType.RETURN)
+                return
 
             this.advance()
         }

@@ -3,7 +3,6 @@ import Scanner from "./Scanner";
 import Token from './Token';
 import { TokenType } from "./TokenType";
 import Parser from './parser';
-import RpnPrinter from './RpnPrinter';
 import { Interpreter } from './Interpreter';
 import { argv } from 'process';
 import * as Stmt from './Stmt';
@@ -40,11 +39,11 @@ const runFile = (path: string): void => {
     run(file)
 
     if (hadError)
-        // process.exit(65)
+        process.exit(0)
         return
 
     if (hadRuntimeError)
-        // process.exit(70)
+        process.exit(0)
         return
 }
 
@@ -59,8 +58,8 @@ const runPrompt = (): void => {
     const promptLoop = () => {
         line.question("> ", (response: string) => {
             if (response === null) {
-                // process.exit(1)
-                // return
+                process.exit(0)
+                return
             }
 
             run(response, true)

@@ -1,0 +1,151 @@
+// tests - conditional execution
+var a = 1;
+if (a == 1) {
+    console.log("a is 1");
+}
+
+output:
+a is 1
+
+<-------------->
+
+var a = 1;
+if (true) {
+    if (a == 2) {
+        console.log("a is 2");
+    } else {
+        console.log("a is not 2");
+    }
+}
+
+
+output:
+a is not 2
+
+<-------------->
+
+var a = 2;
+if (a == 3){
+    print "No";
+}
+else{
+    if(a == 4){
+        print "No";
+    }
+    else{
+        if(a == 5){
+            print "No";
+        }
+        else{
+            if(a == 6){
+                print "No";
+            }
+            else{
+                if(a == 2){
+                    for(var i = 0; i < a; i = i + 1){
+                        print "Yes";
+                    }
+                }
+                else{
+                    print "No";
+                }
+            }
+        }
+    }
+}
+
+output:
+Yes
+Yes
+
+<-------------->
+
+// tests- logical operators
+print nil or "yes";
+print "yes" or "no";
+print 1 or 0;
+print nil and "yes";
+print "yes" and "no";
+print 1 and 0;
+
+output:
+yes
+yes
+1
+null
+no
+0
+
+if (true and true) { print true; } else { print false; }
+if (true and false) { print true; } else { print false; }
+if (false and true) { print true; } else { print false; }
+if (false and false) { print true; } else { print false; }
+print "hi" and 2;
+
+output:
+true
+false
+false
+false
+2
+
+<-------------->
+
+// test 4 - loops
+var i = 0;
+while (i < 5) {
+    console.log(i);
+    i = i + 1;
+}
+
+output:
+0
+1
+2
+3
+4
+
+<-------------->
+
+var i = 0;
+var j = 1;
+
+while (i < 3) {
+    while (j < 3) {
+        console.log(i, j);
+        j = j + 1;
+    }
+    i = i + 1;
+    j = 1;
+}
+
+output:
+0 1
+0 2
+1 1
+1 2
+2 1
+2 2
+
+<-------------->
+
+var temp;
+var o = 1;
+var n = 0;
+for (var i = 1; i < 10; i = i + 1) {
+  print o;
+  temp = o;
+  o = n;
+  n = temp + o;
+}
+
+output:
+1
+0
+1
+1
+2
+3
+5
+8
+13

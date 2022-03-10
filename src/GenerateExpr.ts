@@ -26,7 +26,7 @@ const stmtTypes = [
     "If         : condition: Expr, thenBranch: Stmt, elseBranch: Stmt",
     "Print      : expression: Expr",
     "Var        : name: Token, initializer: Expr",
-    "While      : condition: Expr, body: Stmt",
+    "While      : condition: Expr, body: Stmt, isWhile: boolean",
     "Switch     : condition: Expr, cases: Case[], defaultCase: Stmt",
     "Case       : condition: Expr, body: Stmt",
 ]

@@ -1,0 +1,84 @@
+// Tests - statement and variables
+var a = 1;
+print a;
+var b = "hi";
+print b;
+var c = true;
+print c;
+print !c;
+
+output:
+1
+hi
+true
+false
+
+
+// Tests - assignment
+var a = 1;
+a = 2;
+print a;
+a = true;
+print a;
+
+
+output: 
+2
+true
+
+
+// Tests - scope
+{
+    var a = "first";
+    print a;
+}
+
+{
+    var a = "second";
+    print a;
+}
+
+output:
+first
+second
+
+<-------------->
+
+{ var a = "in block"; }
+print a;
+
+output:
+Undefined variable 'a.' 
+[line 1]
+
+
+var a = "global a";
+var b = "global b";
+var c = "global c";
+{
+  var a = "outer a";
+  var b = "outer b";
+  {
+    var a = "inner a";
+    print a;
+    print b;
+    print c;
+  }
+  print a;
+  print b;
+  print c;
+}
+print a;
+print b;
+print c;
+
+output:
+inner a
+outer b
+global c
+outer a
+outer b
+global c
+global a
+global b
+global c

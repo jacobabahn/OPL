@@ -92,7 +92,19 @@ class Interpreter implements Visitor<any>, Stmt.Visitor<void> {
             while (this.isTruthy(this.evaluate(stmt.condition))) {
                 this.execute(stmt.body)
             }
-        } catch(error){}
+        } catch(error){
+            if (error instanceof BreakException) {
+                return
+            } else if (error instanceof ContinueException) {
+                if (!stmt.isWhile) {
+                    let body = stmt.body as Stmt.Block
+                    let expr = body.statements[1] as Stmt.Expression
+                    this.execute(expr)
+                }
+
+                this.execute(stmt)
+            }
+        }
 
         return null
     }
